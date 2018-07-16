@@ -7,6 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		04E9C48520FBA03800C0EE9A /* new-left.png in Resources */ = {isa = PBXBuildFile; fileRef = 04E9C48220FBA03700C0EE9A /* new-left.png */; };
+		04E9C48620FBA03800C0EE9A /* new-right.png in Resources */ = {isa = PBXBuildFile; fileRef = 04E9C48420FBA03800C0EE9A /* new-right.png */; };
+		04E9C48820FBA4A400C0EE9A /* new-bg-none.png in Resources */ = {isa = PBXBuildFile; fileRef = 04E9C48720FBA4A300C0EE9A /* new-bg-none.png */; };
+		04E9C48A20FBB27C00C0EE9A /* bg-game-board.png in Resources */ = {isa = PBXBuildFile; fileRef = 04E9C48920FBB27C00C0EE9A /* bg-game-board.png */; };
+		04E9C48C20FBB6B000C0EE9A /* new-green-bg-2.png in Resources */ = {isa = PBXBuildFile; fileRef = 04E9C48B20FBB6B000C0EE9A /* new-green-bg-2.png */; };
 		1AC6FB21180E996B004C840B /* libcocos2d Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1AC6FAF9180E9839004C840B /* libcocos2d Mac.a */; };
 		1AC6FB30180E99EB004C840B /* libcocos2d iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1AC6FB07180E9839004C840B /* libcocos2d iOS.a */; };
 		1D60589F0D05DD5A006BFB54 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1D30AB110D05D00D00671497 /* Foundation.framework */; };
@@ -32,9 +37,7 @@
 		2212780320F505CC00E31E20 /* new-menu-button-1.png in Resources */ = {isa = PBXBuildFile; fileRef = 2212780120F505CB00E31E20 /* new-menu-button-1.png */; };
 		2212780520F51E5100E31E20 /* new-bg-main-game.png in Resources */ = {isa = PBXBuildFile; fileRef = 2212780420F51E5100E31E20 /* new-bg-main-game.png */; };
 		2212780A20F529A900E31E20 /* new-down.png in Resources */ = {isa = PBXBuildFile; fileRef = 2212780620F529A900E31E20 /* new-down.png */; };
-		2212780B20F529A900E31E20 /* new-left.png in Resources */ = {isa = PBXBuildFile; fileRef = 2212780720F529A900E31E20 /* new-left.png */; };
 		2212780C20F529A900E31E20 /* new-up.png in Resources */ = {isa = PBXBuildFile; fileRef = 2212780820F529A900E31E20 /* new-up.png */; };
-		2212780D20F529A900E31E20 /* new-right.png in Resources */ = {isa = PBXBuildFile; fileRef = 2212780920F529A900E31E20 /* new-right.png */; };
 		2212781020F52DFC00E31E20 /* new-next.png in Resources */ = {isa = PBXBuildFile; fileRef = 2212780E20F52DFB00E31E20 /* new-next.png */; };
 		2212781120F52DFC00E31E20 /* new-back.png in Resources */ = {isa = PBXBuildFile; fileRef = 2212780F20F52DFB00E31E20 /* new-back.png */; };
 		2212781320F53AA200E31E20 /* new-bg-white-transparent.png in Resources */ = {isa = PBXBuildFile; fileRef = 2212781220F53AA200E31E20 /* new-bg-white-transparent.png */; };
@@ -175,6 +178,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		04E9C48220FBA03700C0EE9A /* new-left.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "new-left.png"; path = "../../../../../../Users/mac/Creative Cloud Files/3x/new-left.png"; sourceTree = "<group>"; };
+		04E9C48420FBA03800C0EE9A /* new-right.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "new-right.png"; path = "../../../../../../Users/mac/Creative Cloud Files/3x/new-right.png"; sourceTree = "<group>"; };
+		04E9C48720FBA4A300C0EE9A /* new-bg-none.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "new-bg-none.png"; sourceTree = "<group>"; };
+		04E9C48920FBB27C00C0EE9A /* bg-game-board.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "bg-game-board.png"; sourceTree = "<group>"; };
+		04E9C48B20FBB6B000C0EE9A /* new-green-bg-2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "new-green-bg-2.png"; sourceTree = "<group>"; };
 		1AC6FAE5180E9839004C840B /* cocos2d_libs.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = cocos2d_libs.xcodeproj; path = ../cocos2d/build/cocos2d_libs.xcodeproj; sourceTree = "<group>"; };
 		1ACB3243164770DE00914215 /* libcurl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcurl.a; path = ../../cocos2dx/platform/third_party/ios/libraries/libcurl.a; sourceTree = "<group>"; };
 		1D30AB110D05D00D00671497 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -202,9 +210,7 @@
 		2212780120F505CB00E31E20 /* new-menu-button-1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "new-menu-button-1.png"; sourceTree = "<group>"; };
 		2212780420F51E5100E31E20 /* new-bg-main-game.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "new-bg-main-game.png"; sourceTree = "<group>"; };
 		2212780620F529A900E31E20 /* new-down.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "new-down.png"; sourceTree = "<group>"; };
-		2212780720F529A900E31E20 /* new-left.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "new-left.png"; sourceTree = "<group>"; };
 		2212780820F529A900E31E20 /* new-up.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "new-up.png"; sourceTree = "<group>"; };
-		2212780920F529A900E31E20 /* new-right.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "new-right.png"; sourceTree = "<group>"; };
 		2212780E20F52DFB00E31E20 /* new-next.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "new-next.png"; sourceTree = "<group>"; };
 		2212780F20F52DFB00E31E20 /* new-back.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "new-back.png"; sourceTree = "<group>"; };
 		2212781220F53AA200E31E20 /* new-bg-white-transparent.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "new-bg-white-transparent.png"; sourceTree = "<group>"; };
@@ -438,18 +444,21 @@
 				46880B7619C43A67006E1F66 /* CloseNormal.png */,
 				221277FC20F4F9AD00E31E20 /* new-column.png */,
 				46880B7719C43A67006E1F66 /* CloseSelected.png */,
+				04E9C48720FBA4A300C0EE9A /* new-bg-none.png */,
+				04E9C48220FBA03700C0EE9A /* new-left.png */,
+				04E9C48420FBA03800C0EE9A /* new-right.png */,
 				221277FE20F4FD2700E31E20 /* new-title-pannel.png */,
+				04E9C48B20FBB6B000C0EE9A /* new-green-bg-2.png */,
 				221277F220F4EF4E00E31E20 /* new-bg-sunbot-2.png */,
+				04E9C48920FBB27C00C0EE9A /* bg-game-board.png */,
 				221277F620F4F00C00E31E20 /* new-pannel-lesson-list.png */,
 				2212780120F505CB00E31E20 /* new-menu-button-1.png */,
 				2212781220F53AA200E31E20 /* new-bg-white-transparent.png */,
 				2212780620F529A900E31E20 /* new-down.png */,
-				2212780720F529A900E31E20 /* new-left.png */,
 				2212781620F53D9900E31E20 /* new-green-bg.png */,
 				2212780F20F52DFB00E31E20 /* new-back.png */,
 				2212780E20F52DFB00E31E20 /* new-next.png */,
 				2212781C20F547B200E31E20 /* new-game-board.png */,
-				2212780920F529A900E31E20 /* new-right.png */,
 				2212780820F529A900E31E20 /* new-up.png */,
 				2212780420F51E5100E31E20 /* new-bg-main-game.png */,
 				2212780020F505CB00E31E20 /* new-menu-button-2.png */,
@@ -685,7 +694,6 @@
 				5087E78117EB970100C73F5D /* Icon-120.png in Resources */,
 				226346F820DAB24900C5779C /* button_play.png in Resources */,
 				221277EC20F4EAF700E31E20 /* new-earse.png in Resources */,
-				2212780B20F529A900E31E20 /* new-left.png in Resources */,
 				5087E78617EB970100C73F5D /* Icon-76.png in Resources */,
 				221277EF20F4EAF700E31E20 /* new-play.png in Resources */,
 				5087E77F17EB970100C73F5D /* Default@2x.png in Resources */,
@@ -693,6 +701,7 @@
 				226346F320DAB18500C5779C /* column.png in Resources */,
 				2212780A20F529A900E31E20 /* new-down.png in Resources */,
 				5087E78317EB970100C73F5D /* Icon-152.png in Resources */,
+				04E9C48620FBA03800C0EE9A /* new-right.png in Resources */,
 				46880B8119C43A67006E1F66 /* HelloWorld.png in Resources */,
 				22ECF99520D021F600993606 /* ic-stone-up.png in Resources */,
 				22C5D2B120DF48AF00282C13 /* game-board.png in Resources */,
@@ -705,6 +714,7 @@
 				224BC95C20D567B00020BBAF /* bg-transparent.png in Resources */,
 				2212781D20F547B200E31E20 /* new-game-board.png in Resources */,
 				5087E78517EB970100C73F5D /* Icon-72.png in Resources */,
+				04E9C48A20FBB27C00C0EE9A /* bg-game-board.png in Resources */,
 				22ECF94720D012D200993606 /* bg-sunbot.png in Resources */,
 				521A8E6519F0C34300D177D7 /* Default-736h@3x.png in Resources */,
 				521A8EA919F11F5000D177D7 /* fonts in Resources */,
@@ -720,6 +730,7 @@
 				22ECF99620D021F600993606 /* ic-stone-down.png in Resources */,
 				2212781320F53AA200E31E20 /* new-bg-white-transparent.png in Resources */,
 				22ECF99320D021F600993606 /* ic-stone-close.png in Resources */,
+				04E9C48C20FBB6B000C0EE9A /* new-green-bg-2.png in Resources */,
 				2212780C20F529A900E31E20 /* new-up.png in Resources */,
 				221277FB20F4F93A00E31E20 /* new-bg-sunbot-3.png in Resources */,
 				5087E78017EB970100C73F5D /* Icon-114.png in Resources */,
@@ -728,6 +739,7 @@
 				2292FBF420DD272300909BF6 /* bg-white.jpg in Resources */,
 				226346EF20DAAD0A00C5779C /* pannel-intro.png in Resources */,
 				50EF62A217ECD613001EB2F8 /* Icon-29.png in Resources */,
+				04E9C48820FBA4A400C0EE9A /* new-bg-none.png in Resources */,
 				22ECF98120D017AE00993606 /* pannel-bottom.png in Resources */,
 				50EF629617ECD46A001EB2F8 /* Icon-40.png in Resources */,
 				5087E78217EB970100C73F5D /* Icon-144.png in Resources */,
@@ -739,8 +751,8 @@
 				3EACC98F19EE6D4300EB3C5E /* res in Resources */,
 				50EF629817ECD46A001EB2F8 /* Icon-80.png in Resources */,
 				5087E78417EB970100C73F5D /* Icon-57.png in Resources */,
+				04E9C48520FBA03800C0EE9A /* new-left.png in Resources */,
 				22ECF98F20D021F600993606 /* ic-stone-about.png in Resources */,
-				2212780D20F529A900E31E20 /* new-right.png in Resources */,
 				5087E77E17EB970100C73F5D /* Default.png in Resources */,
 				22ECF99420D021F600993606 /* ic-stone-right.png in Resources */,
 				521A8E6419F0C34300D177D7 /* Default-667h@2x.png in Resources */,

@@ -81,7 +81,7 @@ bool MainGameScene::init()
     this->addChild(bgMainGame);
     
     float paddingGameBoard = 20;
-    bgGameBoard = Sprite::create("new-green-bg.png");
+    bgGameBoard = Sprite::create("new-green-bg-2.png");
     bgGameBoard->setContentSize(Size(7 * visibleSize.width / 10 - paddingGameBoard, visibleSize.height - 2 * paddingGameBoard));
     bgGameBoard->setAnchorPoint(Vec2(0, 1));
     bgGameBoard->setPosition(Vec2(origin.x + paddingGameBoard / 2, origin.y + visibleSize.height - paddingGameBoard / 2));
@@ -110,7 +110,11 @@ bool MainGameScene::init()
     btBackLevel->addTouchEventListener([&](Ref* sender, ui::Widget::TouchEventType type){
         switch (type) {
             case ui::Widget::TouchEventType::BEGAN:
-                CCLOG("BEGAN");
+                if(level > 1) {
+                    level++;
+                    MainGameScene::showLoading();
+                    MainGameScene::getMap();
+                }
                 break;
             case ui::Widget::TouchEventType::ENDED:
                 break;
@@ -126,7 +130,9 @@ bool MainGameScene::init()
     btNextLevel->addTouchEventListener([&](Ref* sender, ui::Widget::TouchEventType type){
         switch (type) {
             case ui::Widget::TouchEventType::BEGAN:
-                CCLOG("BEGAN");
+                level++;
+                MainGameScene::showLoading();
+                MainGameScene::getMap();
                 break;
             case ui::Widget::TouchEventType::ENDED:
                 break;
@@ -288,31 +294,15 @@ bool MainGameScene::init()
     
     //Add game board
     float paddingGB = 10;
-    gameBoard = Sprite::create("new-game-board.png");
+//    float wGameBoard = bgGameBoard->getContentSize().width - paddingGB;
+//    float hGameBoard = bgGameBoard->getContentSize().height - paddingGB;
+    gameBoard = Sprite::create("new-game-board.png");//new-game-board.png
     gameBoard->setContentSize(Size(bgGameBoard->getContentSize().width - paddingGB, bgGameBoard->getContentSize().height - paddingGB));
 //    gameBoard->setAnchorPoint(Vec2(0, 0));
     gameBoard->setPosition(Vec2(bgGameBoard->getContentSize().width / 2, bgGameBoard->getContentSize().height / 2));
     bgGameBoard->addChild(gameBoard);
     
-    bgLoading = Sprite::create("bg-white.jpg");
-    bgLoading->setContentSize(Size(visibleSize.width, visibleSize.height));
-    bgLoading->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
-    
-    loading2 = Sprite::create("loading2.png");
-    loading2->setContentSize(Size(visibleSize.height/3, visibleSize.height/3));
-    loading2->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
-    
-    auto loadingRotate = RotateBy::create(0.1, 20);
-    auto rotateReeat = RepeatForever::create(loadingRotate);
-    loading2->runAction(rotateReeat);
-    
-    loading1 = Sprite::create("loading1.png");
-    loading1->setContentSize(Size(visibleSize.height/3, visibleSize.height/3));
-    loading1->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
-    
-    this->addChild(bgLoading, 10);
-    this->addChild(loading2, 11);
-    this->addChild(loading1, 11);
+    MainGameScene::showLoading();
     
     MainGameScene::getMap();
     
@@ -321,7 +311,7 @@ bool MainGameScene::init()
 
 void MainGameScene::getMap() {
     auto request = new network::HttpRequest();
-    request->setUrl("http://150.95.105.77:8080/api/courses/getMap/" + std::to_string(lesLessonId));
+    request->setUrl("http://150.95.105.77:8080/api/courses/getMap/" + std::to_string(lesLessonId) + "/" + std::to_string(level));
     request->setRequestType(network::HttpRequest::Type::GET);
     request->setResponseCallback(CC_CALLBACK_2(MainGameScene::onCompleteHttpRequest, this));
     network::HttpClient::getInstance()->send(request);
@@ -339,24 +329,21 @@ void MainGameScene::onCompleteHttpRequest(network::HttpClient *sender, network::
         CCLOG("Error!");
         MainGameScene::getMap();
     } else {
-        if(document.IsArray()) {
-            rapidjson::Value &arr = document[0]["impediments"];
+        if(document.IsObject()) {
+            rapidjson::Value &arr = document["impediments"];
             count = arr.Size();
             if(count == 0) {
                 MainGameScene::hideLoading();
             }
             for (rapidjson::SizeType i = 0; i < arr.Size(); i++) {
-//                idx++;
-                vIndexOfCell.push_back(arr[i]["indexOfCell"].GetInt());
-//                log("vIndexOfCell: %d", arr[i]["indexOfCell"].GetInt());
+                if(arr[i]["indexOfCell"].GetInt() != -1) {
+                    vIndexOfCell.push_back(arr[i]["indexOfCell"].GetInt());
+                } else {
+                    vIndexOfCell.push_back(0);
+                }
                 vType.push_back(arr[i]["type"].GetInt());
                 if(arr[i]["imageUrl"].GetStringLength() > 1) {
-//                    std::string url = arr[i]["imageUrl"].GetString();
-//                    std::replace(url.begin(), url.end(), '\\', '/');
-//                    char ch = '%20';
-//                    std::replace(url.begin(), url.end(), ' ', ch);
-//                    log("vIndexOfCell: %s", url.c_str());
-                    MainGameScene::loadImage("http://image.kidysolution.com/Images/Impediment/CayMatBang/1%20(17).png");//arr[i]["imageUrl"].GetString()
+                    MainGameScene::loadImage(arr[i]["imageUrl"].GetString());
                 } else {
                     idx++;
                     if(idx >= count) {
@@ -381,8 +368,8 @@ void MainGameScene::loadImage(std::string str)
 
 void MainGameScene::onRequestImgCompleted(network::HttpClient *sender, network::HttpResponse *response) {
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-    int wSquare = gameBoard->getContentSize().width / numberOfColumn;
-    int hSquare = (bgGameBoard->getContentSize().height - 10) / numberOfColumn;//gameBoard->getContentSize().height
+    float wSquare = gameBoard->getContentSize().width / numberOfColumn;
+    float hSquare = (gameBoard->getContentSize().height) / numberOfColumn;// (bgGameBoard->getContentSize().height - 10) / numberOfColumn;//gameBoard->getContentSize().height
     if (!response)
     {
         return;
@@ -402,22 +389,56 @@ void MainGameScene::onRequestImgCompleted(network::HttpClient *sender, network::
     int x = indexOfCell % numberOfColumn;
     int y = indexOfCell / numberOfRow;
     log("X: %d, Y: %d", x, y);
-//    if(
-    std::vector<char> *buffer = response->getResponseData();
-    Image * image = new  Image ();
-    image-> initWithImageData ( reinterpret_cast<const unsigned char*>(&(buffer->front())), buffer->size());
-    Texture2D * texture = new  Texture2D ();
-    texture-> initWithImage (image);
-    Sprite * sprite = Sprite :: createWithTexture (texture);
-    sprite->setContentSize(Size(wSquare, hSquare));
-    sprite->setPosition(Vec2(x * wSquare - wSquare/2, y * hSquare + hSquare/2));
-    gameBoard->addChild(sprite, 100);
+
+    if(vType.at(idx) == 4) {
+        auto bgNone = Sprite::create("new-bg-none.png");
+        bgNone->setAnchorPoint(Vec2(0, 0));
+        bgNone->setContentSize(Size(wSquare, hSquare));
+        bgNone->setPosition(Vec2(x * wSquare, y * hSquare));
+        gameBoard->addChild(bgNone, 100);
+    } else {
+        std::vector<char> *buffer = response->getResponseData();
+        Image * image = new  Image ();
+        image-> initWithImageData ( reinterpret_cast<const unsigned char*>(&(buffer->front())), buffer->size());
+        Texture2D * texture = new  Texture2D ();
+        texture-> initWithImage (image);
+        Sprite * sprite = Sprite :: createWithTexture (texture);
+        sprite->setAnchorPoint(Vec2(0, 0));
+        sprite->setContentSize(Size(wSquare, hSquare));
+        sprite->setPosition(Vec2(x * wSquare, y * hSquare));// + wSquare/2  + hSquare/2
+        gameBoard->addChild(sprite, 100);
+    }
     
     idx++;
     if(idx >= count) {
         MainGameScene::hideLoading();
         idx = 0;
     }
+}
+
+void MainGameScene::showLoading() {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    
+    bgLoading = Sprite::create("bg-white.jpg");
+    bgLoading->setContentSize(Size(visibleSize.width, visibleSize.height));
+    bgLoading->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+    
+    loading2 = Sprite::create("loading2.png");
+    loading2->setContentSize(Size(visibleSize.height/3, visibleSize.height/3));
+    loading2->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+    
+    auto loadingRotate = RotateBy::create(0.1, 20);
+    auto rotateReeat = RepeatForever::create(loadingRotate);
+    loading2->runAction(rotateReeat);
+    
+    loading1 = Sprite::create("loading1.png");
+    loading1->setContentSize(Size(visibleSize.height/3, visibleSize.height/3));
+    loading1->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+    
+    this->addChild(bgLoading, 10);
+    this->addChild(loading2, 11);
+    this->addChild(loading1, 11);
 }
 
 void MainGameScene::hideLoading() {

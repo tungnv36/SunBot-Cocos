@@ -32,6 +32,7 @@ public:
     
     void getMap();
     void hideLoading();
+    void showLoading();
     void onCompleteHttpRequest(cocos2d::network::HttpClient *sender, cocos2d::network::HttpResponse *response);
     void onRequestImgCompleted(cocos2d::network::HttpClient *sender, cocos2d::network::HttpResponse *response);
     void loadImage(std::string str);
