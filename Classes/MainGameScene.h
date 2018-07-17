@@ -15,6 +15,9 @@ public:
     int count = 0;
     std::vector<int> vIndexOfCell;
     std::vector<int> vType;
+    std::vector<std::string> vAction;
+    std::vector<cocos2d::Point> vPoint;
+    std::vector<cocos2d::Point> vPointBreak;
     
     cocos2d::Sprite *loading1;
     cocos2d::Sprite *loading2;
@@ -36,6 +39,9 @@ public:
     void onCompleteHttpRequest(cocos2d::network::HttpClient *sender, cocos2d::network::HttpResponse *response);
     void onRequestImgCompleted(cocos2d::network::HttpClient *sender, cocos2d::network::HttpResponse *response);
     void loadImage(std::string str);
+    void runSunBot();
+    void clearGame();
+    int getTypeByIndexOfCell(int indexOfCell);
 };
 
 #endif // __HELLOWORLD_SCENE_H__

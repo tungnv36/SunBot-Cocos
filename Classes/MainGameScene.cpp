@@ -17,9 +17,17 @@ std::string lescDescription;
 std::string lescName;
 int level = 1;
 
+int startPoint = 1;
+int endPoint = 2;
+int objectPoint = 3;
+
+std::string mDirection = "T";
+Point *mFirstPoint;
+
 Sprite *bgMainGame;
 Sprite *bgGameBoard;
 Sprite *gameBoard;
+Sprite *spSunBot;
 
 Scene* MainGameScene::createScene(int index, int coursesId, int lessonId, std::string description, std::string sContent, std::string cDescription, std::string cName)
 {
@@ -30,6 +38,7 @@ Scene* MainGameScene::createScene(int index, int coursesId, int lessonId, std::s
     lessContent = sContent;
     lescDescription = cDescription;
     lescName = cName;
+    
     return MainGameScene::create();
 }
 
@@ -62,6 +71,7 @@ bool MainGameScene::init()
                 CCLOG("BEGAN");
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                MainGameScene::clearGame();
                 auto lesson = LessonScene::createScene(lesIndex, lesCoursesId, lesLessonId, lesDescription, lessContent, lescDescription, lescName);
                 Director::getInstance()->replaceScene(lesson);
                 break;
@@ -199,6 +209,7 @@ bool MainGameScene::init()
                 CCLOG("BEGAN");
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                MainGameScene::clearGame();
                 break;
         }
     });
@@ -229,6 +240,37 @@ bool MainGameScene::init()
                 CCLOG("BEGAN");
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                vAction.push_back("B");
+                //Lấy vị trí trước
+                auto oldPoint = mFirstPoint;
+                if(vPoint.size() > 0) {
+                    oldPoint = &vPoint.at(vPoint.size() - 1);
+                }
+                //Add point theo hướng
+                float x = 0;
+                float y = 0;
+                if(mDirection == "T") {
+                    x = oldPoint->x;
+                    y = oldPoint->y - 1;
+                } else if(mDirection == "B") {
+                    x = oldPoint->x;
+                    y = oldPoint->y + 1;
+                } else if(mDirection == "L") {
+                    x = oldPoint->x + 1;
+                    y = oldPoint->y;
+                } else {//R
+                    x = oldPoint->x - 1;
+                    y = oldPoint->y;
+                }
+                if(MainGameScene::getTypeByIndexOfCell(y * numberOfRow + x) == objectPoint) {
+                    x = oldPoint->x;
+                    y = oldPoint->y;
+                    vPointBreak.push_back(*new Point(Vec2(x, y)));
+                } else {
+                    vPointBreak.push_back(*new Point(Vec2(x, y)));
+                }
+                auto curPoint = new Point(Vec2(x, y));
+                vPoint.push_back(*curPoint);
                 break;
         }
     });
@@ -240,9 +282,9 @@ bool MainGameScene::init()
     btPlay->addTouchEventListener([&](Ref* sender, ui::Widget::TouchEventType type){
         switch (type) {
             case ui::Widget::TouchEventType::BEGAN:
-                CCLOG("BEGAN");
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                MainGameScene::runSunBot();
                 break;
         }
     });
@@ -257,6 +299,37 @@ bool MainGameScene::init()
                 CCLOG("BEGAN");
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                vAction.push_back("T");
+                //Lấy vị trí trước
+                auto oldPoint = mFirstPoint;
+                if(vPoint.size() > 0) {
+                    oldPoint = &vPoint.at(vPoint.size() - 1);
+                }
+                //Add point theo hướng
+                float x = 0;
+                float y = 0;
+                if(mDirection == "T") {
+                    x = oldPoint->x;
+                    y = oldPoint->y + 1;
+                } else if(mDirection == "B") {
+                    x = oldPoint->x;
+                    y = oldPoint->y - 1;
+                } else if(mDirection == "L") {
+                    x = oldPoint->x - 1;
+                    y = oldPoint->y;
+                } else {//R
+                    x = oldPoint->x + 1;
+                    y = oldPoint->y;
+                }
+                if(MainGameScene::getTypeByIndexOfCell(y * numberOfRow + x) == objectPoint) {
+                    x = oldPoint->x;
+                    y = oldPoint->y;
+                    vPointBreak.push_back(*new Point(Vec2(x, y)));
+                } else {
+                    vPointBreak.push_back(*new Point(Vec2(x, y)));
+                }
+                auto curPoint = new Point(Vec2(x, y));
+                vPoint.push_back(*curPoint);
                 break;
         }
     });
@@ -272,6 +345,24 @@ bool MainGameScene::init()
                 CCLOG("BEGAN");
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                vAction.push_back("L");
+                //Lấy vị trí trước
+                auto oldPoint = mFirstPoint;
+                if(vPoint.size() > 0) {
+                    oldPoint = &vPoint.at(vPoint.size() - 1);
+                }
+                vPoint.push_back(*oldPoint);
+                vPointBreak.push_back(*oldPoint);
+                //Xác định direction
+                if(mDirection == "T") {
+                    mDirection = "L";
+                } else if(mDirection == "L") {
+                    mDirection = "B";
+                } else if(mDirection == "B") {
+                    mDirection = "R";
+                } else {
+                    mDirection = "T";
+                }
                 break;
         }
     });
@@ -287,6 +378,24 @@ bool MainGameScene::init()
                 CCLOG("BEGAN");
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                vAction.push_back("R");
+                //Lấy vị trí trước
+                auto oldPoint = mFirstPoint;
+                if(vPoint.size() > 0) {
+                    oldPoint = &vPoint.at(vPoint.size() - 1);
+                }
+                vPoint.push_back(*oldPoint);
+                vPointBreak.push_back(*oldPoint);
+                //Xác định direction
+                if(mDirection == "T") {
+                    mDirection = "R";
+                } else if(mDirection == "L") {
+                    mDirection = "T";
+                } else if(mDirection == "B") {
+                    mDirection = "L";
+                } else {
+                    mDirection = "B";
+                }
                 break;
         }
     });
@@ -307,6 +416,85 @@ bool MainGameScene::init()
     MainGameScene::getMap();
     
     return true;
+}
+
+int MainGameScene::getTypeByIndexOfCell(int indexOfCell) {
+    for(int i = 0; i < vIndexOfCell.size(); i++) {
+        if(indexOfCell == vIndexOfCell.at(i)) {
+            return vType.at(i);
+        }
+    }
+    return 0;
+}
+
+void MainGameScene::clearGame() {
+    float wSquare = gameBoard->getContentSize().width / numberOfColumn;
+    float hSquare = (gameBoard->getContentSize().height) / numberOfColumn;
+    spSunBot->setPosition(Vec2(mFirstPoint->x * wSquare + wSquare/2, mFirstPoint->y * hSquare + hSquare/2));
+    auto actionRotate = RotateTo::create(0.1, 0);
+    spSunBot->runAction(actionRotate);
+    mDirection = "T";
+    vAction.clear();
+    vPoint.clear();
+    vPointBreak.clear();
+}
+
+void MainGameScene::runSunBot() {
+    Vector<FiniteTimeAction*> animFrames;
+    float wSquare = gameBoard->getContentSize().width / numberOfColumn;
+    float hSquare = (gameBoard->getContentSize().height) / numberOfColumn;
+    for (int i = 0; i < vAction.size(); i++) {
+        if(vAction.at(i) == "T") {
+            float x = vPoint.at(i).x;
+            float y = vPoint.at(i).y;
+            //Xử lý đi vào vật cản
+//            float xPre = mFirstPoint->x;
+//            float yPre = mFirstPoint->y;
+//            if(i > 0) {
+//                xPre = vPoint.at(i - 1).x;
+//                yPre = vPoint.at(i - 1).y;
+//            }
+//            if(i > 0 && xPre == x && yPre == y) {
+//                auto actionMove1 = MoveTo::create(0.5, Vec2(xPre * wSquare + wSquare/2, yPre * hSquare + hSquare/2));
+//                auto actionMove2 = MoveTo::create(0.5, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
+//                animFrames.pushBack(actionMove1);
+//                animFrames.pushBack(actionMove2);
+//            } else {
+                auto actionMove = MoveTo::create(1, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
+                animFrames.pushBack(actionMove);
+//            }
+        }
+        if(vAction.at(i) == "B") {
+            float x = vPoint.at(i).x;
+            float y = vPoint.at(i).y;
+            //Xử lý đi vào vật cản
+            float xPre = mFirstPoint->x;
+            float yPre = mFirstPoint->y;
+            if(i > 0) {
+                xPre = vPoint.at(i - 1).x;
+                yPre = vPoint.at(i - 1).y;
+            }
+            if(xPre == x && yPre == y) {
+                auto actionMove1 = MoveTo::create(0.5, Vec2(xPre * wSquare + wSquare/2, yPre * hSquare + hSquare/2));
+                auto actionMove2 = MoveTo::create(0.5, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
+                animFrames.pushBack(actionMove1);
+                animFrames.pushBack(actionMove2);
+            } else {
+                auto actionMove = MoveTo::create(1, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
+                animFrames.pushBack(actionMove);
+            }
+        }
+        if(vAction.at(i) == "L") {
+            auto actionRotate = RotateBy::create(1, -90);
+            animFrames.pushBack(actionRotate);
+        }
+        if(vAction.at(i) == "R") {
+            auto actionRotate = RotateBy::create(1, 90);
+            animFrames.pushBack(actionRotate);
+        }
+    }
+    auto actionSequence = Sequence::create(animFrames);
+    spSunBot->runAction(actionSequence);
 }
 
 void MainGameScene::getMap() {
@@ -336,6 +524,11 @@ void MainGameScene::onCompleteHttpRequest(network::HttpClient *sender, network::
                 MainGameScene::hideLoading();
             }
             for (rapidjson::SizeType i = 0; i < arr.Size(); i++) {
+                if(arr[i]["type"].GetInt() == 1) {
+                    int x = arr[i]["indexOfCell"].GetInt() % numberOfColumn;
+                    int y = arr[i]["indexOfCell"].GetInt() / numberOfRow;
+                    mFirstPoint = new Point(Vec2(x, y));
+                }
                 if(arr[i]["indexOfCell"].GetInt() != -1) {
                     vIndexOfCell.push_back(arr[i]["indexOfCell"].GetInt());
                 } else {
@@ -392,10 +585,21 @@ void MainGameScene::onRequestImgCompleted(network::HttpClient *sender, network::
 
     if(vType.at(idx) == 4) {
         auto bgNone = Sprite::create("new-bg-none.png");
-        bgNone->setAnchorPoint(Vec2(0, 0));
+//        bgNone->setAnchorPoint(Vec2(0, 0));
         bgNone->setContentSize(Size(wSquare, hSquare));
-        bgNone->setPosition(Vec2(x * wSquare, y * hSquare));
+        bgNone->setPosition(Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
         gameBoard->addChild(bgNone, 100);
+    } else if(vType.at(idx) == 1) {
+        std::vector<char> *buffer = response->getResponseData();
+        Image * image = new  Image ();
+        image-> initWithImageData ( reinterpret_cast<const unsigned char*>(&(buffer->front())), buffer->size());
+        Texture2D * texture = new  Texture2D ();
+        texture-> initWithImage (image);
+        spSunBot = Sprite :: createWithTexture (texture);
+//        spSunBot->setAnchorPoint(Vec2(0, 0));
+        spSunBot->setContentSize(Size(wSquare, hSquare));
+        spSunBot->setPosition(Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
+        gameBoard->addChild(spSunBot, 200);
     } else {
         std::vector<char> *buffer = response->getResponseData();
         Image * image = new  Image ();
@@ -403,9 +607,9 @@ void MainGameScene::onRequestImgCompleted(network::HttpClient *sender, network::
         Texture2D * texture = new  Texture2D ();
         texture-> initWithImage (image);
         Sprite * sprite = Sprite :: createWithTexture (texture);
-        sprite->setAnchorPoint(Vec2(0, 0));
+//        sprite->setAnchorPoint(Vec2(0, 0));
         sprite->setContentSize(Size(wSquare, hSquare));
-        sprite->setPosition(Vec2(x * wSquare, y * hSquare));// + wSquare/2  + hSquare/2
+        sprite->setPosition(Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));// + wSquare/2  + hSquare/2
         gameBoard->addChild(sprite, 100);
     }
     
