@@ -216,7 +216,7 @@ void LessonList::getLessonList() {
 
 void LessonList::onCompleteHttpRequest(network::HttpClient *sender, network::HttpResponse *response) {
     std::vector<char> *buffer = response->getResponseData();
-    log("%s", buffer->data());
+    log("DATA: %s", buffer->data());
     std::string str = buffer->data();
     rapidjson::Document document;
     document.Parse<0>(str.c_str());
@@ -259,6 +259,7 @@ void LessonList::hideLoading() {
 
 void LessonList::loadImage(std::string str)
 {
+    log("Image URL: %s", str.c_str());
     auto request = new network::HttpRequest();
     request->setUrl(str);
     request->setRequestType(network::HttpRequest::Type::GET);

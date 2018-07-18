@@ -32,6 +32,12 @@ public:
     
     // implement the "static create()" method manually
     CREATE_FUNC(MainGameScene);
+private:
+//    cocos2d::PhysicsWorld *world;
+//    void setPhysicWorld(cocos2d::PhysicsWorld *m_world)
+//    {
+//        world = m_world;
+//    }
     
     void getMap();
     void hideLoading();
@@ -42,6 +48,8 @@ public:
     void runSunBot();
     void clearGame();
     int getTypeByIndexOfCell(int indexOfCell);
+    void gameWin();
+    void gameOver();
 };
 
 #endif // __HELLOWORLD_SCENE_H__

@@ -262,15 +262,15 @@ bool MainGameScene::init()
                     x = oldPoint->x - 1;
                     y = oldPoint->y;
                 }
-                if(MainGameScene::getTypeByIndexOfCell(y * numberOfRow + x) == objectPoint) {
+                if(MainGameScene::getTypeByIndexOfCell(y * numberOfRow + x) == objectPoint || x < 0 || x > numberOfColumn - 1 || y < 0 || y > numberOfRow - 1) {
+                    vPointBreak.push_back(*new Point(Vec2(x, y)));
                     x = oldPoint->x;
                     y = oldPoint->y;
-                    vPointBreak.push_back(*new Point(Vec2(x, y)));
+                    vPoint.push_back(*new Point(Vec2(x, y)));
                 } else {
                     vPointBreak.push_back(*new Point(Vec2(x, y)));
+                    vPoint.push_back(*new Point(Vec2(x, y)));
                 }
-                auto curPoint = new Point(Vec2(x, y));
-                vPoint.push_back(*curPoint);
                 break;
         }
     });
@@ -321,15 +321,16 @@ bool MainGameScene::init()
                     x = oldPoint->x + 1;
                     y = oldPoint->y;
                 }
-                if(MainGameScene::getTypeByIndexOfCell(y * numberOfRow + x) == objectPoint) {
+                if(MainGameScene::getTypeByIndexOfCell(y * numberOfRow + x) == objectPoint || x < 0 || x > numberOfColumn - 1 || y < 0 || y > numberOfRow - 1) {
+                    vPointBreak.push_back(*new Point(Vec2(x, y)));
                     x = oldPoint->x;
                     y = oldPoint->y;
-                    vPointBreak.push_back(*new Point(Vec2(x, y)));
+                    vPoint.push_back(*new Point(Vec2(x, y)));
                 } else {
                     vPointBreak.push_back(*new Point(Vec2(x, y)));
+                    vPoint.push_back(*new Point(Vec2(x, y)));
                 }
-                auto curPoint = new Point(Vec2(x, y));
-                vPoint.push_back(*curPoint);
+                
                 break;
         }
     });
@@ -447,41 +448,31 @@ void MainGameScene::runSunBot() {
         if(vAction.at(i) == "T") {
             float x = vPoint.at(i).x;
             float y = vPoint.at(i).y;
-            //Xử lý đi vào vật cản
-//            float xPre = mFirstPoint->x;
-//            float yPre = mFirstPoint->y;
-//            if(i > 0) {
-//                xPre = vPoint.at(i - 1).x;
-//                yPre = vPoint.at(i - 1).y;
-//            }
-//            if(i > 0 && xPre == x && yPre == y) {
-//                auto actionMove1 = MoveTo::create(0.5, Vec2(xPre * wSquare + wSquare/2, yPre * hSquare + hSquare/2));
-//                auto actionMove2 = MoveTo::create(0.5, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
-//                animFrames.pushBack(actionMove1);
-//                animFrames.pushBack(actionMove2);
-//            } else {
+            float x2 = vPointBreak.at(i).x;
+            float y2 = vPointBreak.at(i).y;
+            if(x == x2 && y == y2) {
                 auto actionMove = MoveTo::create(1, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
                 animFrames.pushBack(actionMove);
-//            }
+            } else {
+                auto actionMove1 = MoveTo::create(0.1, Vec2(x2 * wSquare + wSquare/2, y2 * hSquare + hSquare/2));
+                auto actionMove2 = MoveTo::create(0.1, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
+                animFrames.pushBack(actionMove1);
+                animFrames.pushBack(actionMove2);
+            }
         }
         if(vAction.at(i) == "B") {
             float x = vPoint.at(i).x;
             float y = vPoint.at(i).y;
-            //Xử lý đi vào vật cản
-            float xPre = mFirstPoint->x;
-            float yPre = mFirstPoint->y;
-            if(i > 0) {
-                xPre = vPoint.at(i - 1).x;
-                yPre = vPoint.at(i - 1).y;
-            }
-            if(xPre == x && yPre == y) {
-                auto actionMove1 = MoveTo::create(0.5, Vec2(xPre * wSquare + wSquare/2, yPre * hSquare + hSquare/2));
-                auto actionMove2 = MoveTo::create(0.5, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
-                animFrames.pushBack(actionMove1);
-                animFrames.pushBack(actionMove2);
-            } else {
+            float x2 = vPointBreak.at(i).x;
+            float y2 = vPointBreak.at(i).y;
+            if(x == x2 && y == y2) {
                 auto actionMove = MoveTo::create(1, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
                 animFrames.pushBack(actionMove);
+            } else {
+                auto actionMove1 = MoveTo::create(0.1, Vec2(x2 * wSquare + wSquare/2, y2 * hSquare + hSquare/2));
+                auto actionMove2 = MoveTo::create(0.1, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
+                animFrames.pushBack(actionMove1);
+                animFrames.pushBack(actionMove2);
             }
         }
         if(vAction.at(i) == "L") {
@@ -493,8 +484,77 @@ void MainGameScene::runSunBot() {
             animFrames.pushBack(actionRotate);
         }
     }
+    auto callback = CallFunc::create( [this]() {
+        float x = vPoint.at(vPoint.size() - 1).x;
+        float y = vPoint.at(vPoint.size() - 1).y;
+        if(MainGameScene::getTypeByIndexOfCell(y * numberOfRow + x) == endPoint) {
+            MainGameScene::gameWin();
+        } else {
+            MainGameScene::gameOver();
+        }
+    });
+    animFrames.pushBack(callback);
     auto actionSequence = Sequence::create(animFrames);
     spSunBot->runAction(actionSequence);
+}
+
+void MainGameScene::gameWin() {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    
+    auto gameWinSprite = Sprite::create("new-pannel-course.png");
+    gameWinSprite->setContentSize(Size(visibleSize.width / 2.5, visibleSize.height / 2));
+    gameWinSprite->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+    
+    this->addChild(gameWinSprite, 1000);
+}
+
+void MainGameScene::gameOver() {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    //background
+    auto bgGameOver = Sprite::create("bg-transparent.png");
+    bgGameOver->setContentSize(Size(visibleSize.width, visibleSize.height));
+    bgGameOver->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+    this->addChild(bgGameOver, 1000);
+    //pannel
+    auto gamePannelSprite = Sprite::create("new-pannel-lesson-list.png");
+    gamePannelSprite->setContentSize(Size(visibleSize.width / 2.5, visibleSize.height / 2));
+    gamePannelSprite->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y - visibleSize.height / 2));
+    auto actionMove = MoveTo::create(0.2, Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+    gamePannelSprite->runAction(actionMove);
+    bgGameOver->addChild(gamePannelSprite);
+    //text
+    auto lblContent = Label::createWithTTF("Thua mất rồi", "fonts/arial.ttf", 14);
+    lblContent->setPosition(Vec2(gamePannelSprite->getContentSize().width/2, gamePannelSprite->getContentSize().height/2));
+    lblContent->setTextColor(Color4B::BLACK);
+    gamePannelSprite->addChild(lblContent);
+    auto lblContent2 = Label::createWithTTF("Cùng thử lại nhé!", "fonts/arial.ttf", 14);
+    lblContent2->setPosition(Vec2(gamePannelSprite->getContentSize().width/2, lblContent->getPosition().y - lblContent->getContentSize().height));
+    lblContent2->setTextColor(Color4B::BLACK);
+    gamePannelSprite->addChild(lblContent2);
+    //Button
+    auto btRePlay = ui::Button::create("new-menu-button-2.png");
+    btRePlay->setScale((gamePannelSprite->getContentSize().width/2) / btRePlay->getContentSize().width);
+    btRePlay->setPosition(Vec2(gamePannelSprite->getContentSize().width / 2, 0));
+    btRePlay->addTouchEventListener([&](Ref* sender, ui::Widget::TouchEventType type){
+        switch (type) {
+            case ui::Widget::TouchEventType::BEGAN:
+                CCLOG("BEGAN");
+                break;
+            case ui::Widget::TouchEventType::ENDED:
+                bgGameOver->removeFromParent();
+                gamePannelSprite->removeFromParent();
+                MainGameScene::clearGame();
+                break;
+        }
+    });
+    gamePannelSprite->addChild(btRePlay);
+    
+    auto lblTextButton = Label::createWithTTF("Chơi lại", "fonts/arial.ttf", 5);
+    lblTextButton->setPosition(Vec2(btRePlay->getContentSize().width/2, btRePlay->getContentSize().height/2));
+    lblTextButton->setTextColor(Color4B::WHITE);
+    btRePlay->addChild(lblTextButton);
 }
 
 void MainGameScene::getMap() {
@@ -585,7 +645,6 @@ void MainGameScene::onRequestImgCompleted(network::HttpClient *sender, network::
 
     if(vType.at(idx) == 4) {
         auto bgNone = Sprite::create("new-bg-none.png");
-//        bgNone->setAnchorPoint(Vec2(0, 0));
         bgNone->setContentSize(Size(wSquare, hSquare));
         bgNone->setPosition(Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
         gameBoard->addChild(bgNone, 100);
@@ -596,8 +655,7 @@ void MainGameScene::onRequestImgCompleted(network::HttpClient *sender, network::
         Texture2D * texture = new  Texture2D ();
         texture-> initWithImage (image);
         spSunBot = Sprite :: createWithTexture (texture);
-//        spSunBot->setAnchorPoint(Vec2(0, 0));
-        spSunBot->setContentSize(Size(wSquare, hSquare));
+        spSunBot->setContentSize(Size(wSquare>hSquare?hSquare:wSquare, wSquare>hSquare?hSquare:wSquare));
         spSunBot->setPosition(Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
         gameBoard->addChild(spSunBot, 200);
     } else {
@@ -607,7 +665,6 @@ void MainGameScene::onRequestImgCompleted(network::HttpClient *sender, network::
         Texture2D * texture = new  Texture2D ();
         texture-> initWithImage (image);
         Sprite * sprite = Sprite :: createWithTexture (texture);
-//        sprite->setAnchorPoint(Vec2(0, 0));
         sprite->setContentSize(Size(wSquare, hSquare));
         sprite->setPosition(Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));// + wSquare/2  + hSquare/2
         gameBoard->addChild(sprite, 100);
