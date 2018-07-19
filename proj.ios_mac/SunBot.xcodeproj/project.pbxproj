@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0453E4282100D45E00909EAA /* sunbot-sad.png in Resources */ = {isa = PBXBuildFile; fileRef = 0453E4262100D45E00909EAA /* sunbot-sad.png */; };
 		04E9C48520FBA03800C0EE9A /* new-left.png in Resources */ = {isa = PBXBuildFile; fileRef = 04E9C48220FBA03700C0EE9A /* new-left.png */; };
 		04E9C48620FBA03800C0EE9A /* new-right.png in Resources */ = {isa = PBXBuildFile; fileRef = 04E9C48420FBA03800C0EE9A /* new-right.png */; };
 		04E9C48820FBA4A400C0EE9A /* new-bg-none.png in Resources */ = {isa = PBXBuildFile; fileRef = 04E9C48720FBA4A300C0EE9A /* new-bg-none.png */; };
@@ -178,6 +179,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0453E4262100D45E00909EAA /* sunbot-sad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sunbot-sad.png"; sourceTree = "<group>"; };
 		04E9C48220FBA03700C0EE9A /* new-left.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "new-left.png"; path = "../../../../../../Users/mac/Creative Cloud Files/3x/new-left.png"; sourceTree = "<group>"; };
 		04E9C48420FBA03800C0EE9A /* new-right.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "new-right.png"; path = "../../../../../../Users/mac/Creative Cloud Files/3x/new-right.png"; sourceTree = "<group>"; };
 		04E9C48720FBA4A300C0EE9A /* new-bg-none.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "new-bg-none.png"; sourceTree = "<group>"; };
@@ -445,6 +447,7 @@
 				221277FC20F4F9AD00E31E20 /* new-column.png */,
 				46880B7719C43A67006E1F66 /* CloseSelected.png */,
 				04E9C48720FBA4A300C0EE9A /* new-bg-none.png */,
+				0453E4262100D45E00909EAA /* sunbot-sad.png */,
 				04E9C48220FBA03700C0EE9A /* new-left.png */,
 				04E9C48420FBA03800C0EE9A /* new-right.png */,
 				221277FE20F4FD2700E31E20 /* new-title-pannel.png */,
@@ -710,6 +713,7 @@
 				5087E77D17EB970100C73F5D /* Default-568h@2x.png in Resources */,
 				224BC95A20D5653A0020BBAF /* loading2.png in Resources */,
 				221277F120F4EAF700E31E20 /* Setting@3x.png in Resources */,
+				0453E4282100D45E00909EAA /* sunbot-sad.png in Resources */,
 				226406D720DC07E30020BCAA /* stone_h.png in Resources */,
 				224BC95C20D567B00020BBAF /* bg-transparent.png in Resources */,
 				2212781D20F547B200E31E20 /* new-game-board.png in Resources */,

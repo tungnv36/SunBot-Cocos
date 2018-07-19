@@ -21,6 +21,8 @@ int startPoint = 1;
 int endPoint = 2;
 int objectPoint = 3;
 
+bool isPlay = true;
+
 std::string mDirection = "T";
 Point *mFirstPoint;
 
@@ -28,6 +30,9 @@ Sprite *bgMainGame;
 Sprite *bgGameBoard;
 Sprite *gameBoard;
 Sprite *spSunBot;
+
+Sprite *bgGameOver;
+Sprite *gamePannelSprite;
 
 Scene* MainGameScene::createScene(int index, int coursesId, int lessonId, std::string description, std::string sContent, std::string cDescription, std::string cName)
 {
@@ -120,13 +125,13 @@ bool MainGameScene::init()
     btBackLevel->addTouchEventListener([&](Ref* sender, ui::Widget::TouchEventType type){
         switch (type) {
             case ui::Widget::TouchEventType::BEGAN:
-                if(level > 1) {
-                    level++;
-                    MainGameScene::showLoading();
-                    MainGameScene::getMap();
-                }
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                if(level > 1) {
+                    level--;
+                    auto mainGame = MainGameScene::createScene(lesIndex, lesCoursesId, lesLessonId, lesDescription, lessContent, lescDescription, lescName);
+                    Director::getInstance()->replaceScene(mainGame);
+                }
                 break;
         }
     });
@@ -140,11 +145,14 @@ bool MainGameScene::init()
     btNextLevel->addTouchEventListener([&](Ref* sender, ui::Widget::TouchEventType type){
         switch (type) {
             case ui::Widget::TouchEventType::BEGAN:
-                level++;
-                MainGameScene::showLoading();
-                MainGameScene::getMap();
+//                MainGameScene::clearGame();
+//                gameBoard->removeFromParent();
+//                MainGameScene::nextBackGame();
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                level++;
+                auto mainGame = MainGameScene::createScene(lesIndex, lesCoursesId, lesLessonId, lesDescription, lessContent, lescDescription, lescName);
+                Director::getInstance()->replaceScene(mainGame);
                 break;
         }
     });
@@ -209,6 +217,7 @@ bool MainGameScene::init()
                 CCLOG("BEGAN");
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                spSunBot->stopAllActions();
                 MainGameScene::clearGame();
                 break;
         }
@@ -225,6 +234,8 @@ bool MainGameScene::init()
                 CCLOG("BEGAN");
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                MainGameScene::gameSetting();
+                Director::getInstance()->pause();
                 break;
         }
     });
@@ -404,19 +415,37 @@ bool MainGameScene::init()
     
     //Add game board
     float paddingGB = 10;
-//    float wGameBoard = bgGameBoard->getContentSize().width - paddingGB;
-//    float hGameBoard = bgGameBoard->getContentSize().height - paddingGB;
     gameBoard = Sprite::create("new-game-board.png");//new-game-board.png
     gameBoard->setContentSize(Size(bgGameBoard->getContentSize().width - paddingGB, bgGameBoard->getContentSize().height - paddingGB));
-//    gameBoard->setAnchorPoint(Vec2(0, 0));
     gameBoard->setPosition(Vec2(bgGameBoard->getContentSize().width / 2, bgGameBoard->getContentSize().height / 2));
     bgGameBoard->addChild(gameBoard);
     
     MainGameScene::showLoading();
-    
     MainGameScene::getMap();
     
+    auto draw = DrawNode::create();
+    
+//    draw->drawLine(Point(0, 0), Point(100, 100), Color4F::RED);
+//    this->addChild(draw,1);
+    
     return true;
+}
+
+void MainGameScene::nextBackGame() {
+    //Add game board
+    float paddingGB = 10;
+    gameBoard = Sprite::create("new-game-board.png");//new-game-board.png
+    gameBoard->setContentSize(Size(bgGameBoard->getContentSize().width - paddingGB, bgGameBoard->getContentSize().height - paddingGB));
+    gameBoard->setPosition(Vec2(bgGameBoard->getContentSize().width / 2, bgGameBoard->getContentSize().height / 2));
+    bgGameBoard->addChild(gameBoard);
+    
+    mDirection = "T";
+    vAction.clear();
+    vPoint.clear();
+    vPointBreak.clear();
+    
+    MainGameScene::showLoading();
+    MainGameScene::getMap();
 }
 
 int MainGameScene::getTypeByIndexOfCell(int indexOfCell) {
@@ -441,95 +470,86 @@ void MainGameScene::clearGame() {
 }
 
 void MainGameScene::runSunBot() {
-    Vector<FiniteTimeAction*> animFrames;
-    float wSquare = gameBoard->getContentSize().width / numberOfColumn;
-    float hSquare = (gameBoard->getContentSize().height) / numberOfColumn;
-    for (int i = 0; i < vAction.size(); i++) {
-        if(vAction.at(i) == "T") {
-            float x = vPoint.at(i).x;
-            float y = vPoint.at(i).y;
-            float x2 = vPointBreak.at(i).x;
-            float y2 = vPointBreak.at(i).y;
-            if(x == x2 && y == y2) {
-                auto actionMove = MoveTo::create(1, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
-                animFrames.pushBack(actionMove);
-            } else {
-                auto actionMove1 = MoveTo::create(0.1, Vec2(x2 * wSquare + wSquare/2, y2 * hSquare + hSquare/2));
-                auto actionMove2 = MoveTo::create(0.1, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
-                animFrames.pushBack(actionMove1);
-                animFrames.pushBack(actionMove2);
+    if(vAction.size() > 0) {
+        Vector<FiniteTimeAction*> animFrames;
+        float wSquare = gameBoard->getContentSize().width / numberOfColumn;
+        float hSquare = (gameBoard->getContentSize().height) / numberOfColumn;
+        for (int i = 0; i < vAction.size(); i++) {
+            if(vAction.at(i) == "T") {
+                float x = vPoint.at(i).x;
+                float y = vPoint.at(i).y;
+                float x2 = vPointBreak.at(i).x;
+                float y2 = vPointBreak.at(i).y;
+                if(x == x2 && y == y2) {
+                    auto actionMove = MoveTo::create(1, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
+                    animFrames.pushBack(actionMove);
+                } else {
+                    auto actionMove1 = MoveTo::create(0.1, Vec2(x2 * wSquare + wSquare/2, y2 * hSquare + hSquare/2));
+                    auto actionMove2 = MoveTo::create(0.1, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
+                    animFrames.pushBack(actionMove1);
+                    animFrames.pushBack(actionMove2);
+                }
+            }
+            if(vAction.at(i) == "B") {
+                float x = vPoint.at(i).x;
+                float y = vPoint.at(i).y;
+                float x2 = vPointBreak.at(i).x;
+                float y2 = vPointBreak.at(i).y;
+                if(x == x2 && y == y2) {
+                    auto actionMove = MoveTo::create(1, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
+                    animFrames.pushBack(actionMove);
+                } else {
+                    auto actionMove1 = MoveTo::create(0.1, Vec2(x2 * wSquare + wSquare/2, y2 * hSquare + hSquare/2));
+                    auto actionMove2 = MoveTo::create(0.1, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
+                    animFrames.pushBack(actionMove1);
+                    animFrames.pushBack(actionMove2);
+                }
+            }
+            if(vAction.at(i) == "L") {
+                auto actionRotate = RotateBy::create(1, -90);
+                animFrames.pushBack(actionRotate);
+            }
+            if(vAction.at(i) == "R") {
+                auto actionRotate = RotateBy::create(1, 90);
+                animFrames.pushBack(actionRotate);
             }
         }
-        if(vAction.at(i) == "B") {
-            float x = vPoint.at(i).x;
-            float y = vPoint.at(i).y;
-            float x2 = vPointBreak.at(i).x;
-            float y2 = vPointBreak.at(i).y;
-            if(x == x2 && y == y2) {
-                auto actionMove = MoveTo::create(1, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
-                animFrames.pushBack(actionMove);
+        auto callback = CallFunc::create( [this]() {
+            float x = vPoint.at(vPoint.size() - 1).x;
+            float y = vPoint.at(vPoint.size() - 1).y;
+            if(MainGameScene::getTypeByIndexOfCell(y * numberOfRow + x) == endPoint) {
+                MainGameScene::gameWin();
             } else {
-                auto actionMove1 = MoveTo::create(0.1, Vec2(x2 * wSquare + wSquare/2, y2 * hSquare + hSquare/2));
-                auto actionMove2 = MoveTo::create(0.1, Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
-                animFrames.pushBack(actionMove1);
-                animFrames.pushBack(actionMove2);
+                MainGameScene::gameOver();
             }
-        }
-        if(vAction.at(i) == "L") {
-            auto actionRotate = RotateBy::create(1, -90);
-            animFrames.pushBack(actionRotate);
-        }
-        if(vAction.at(i) == "R") {
-            auto actionRotate = RotateBy::create(1, 90);
-            animFrames.pushBack(actionRotate);
-        }
+        });
+        animFrames.pushBack(callback);
+        auto actionSequence = Sequence::create(animFrames);
+        spSunBot->runAction(actionSequence);
     }
-    auto callback = CallFunc::create( [this]() {
-        float x = vPoint.at(vPoint.size() - 1).x;
-        float y = vPoint.at(vPoint.size() - 1).y;
-        if(MainGameScene::getTypeByIndexOfCell(y * numberOfRow + x) == endPoint) {
-            MainGameScene::gameWin();
-        } else {
-            MainGameScene::gameOver();
-        }
-    });
-    animFrames.pushBack(callback);
-    auto actionSequence = Sequence::create(animFrames);
-    spSunBot->runAction(actionSequence);
 }
 
 void MainGameScene::gameWin() {
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
-    
-    auto gameWinSprite = Sprite::create("new-pannel-course.png");
-    gameWinSprite->setContentSize(Size(visibleSize.width / 2.5, visibleSize.height / 2));
-    gameWinSprite->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
-    
-    this->addChild(gameWinSprite, 1000);
-}
-
-void MainGameScene::gameOver() {
-    auto visibleSize = Director::getInstance()->getVisibleSize();
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
     //background
-    auto bgGameOver = Sprite::create("bg-transparent.png");
+    bgGameOver = Sprite::create("bg-transparent.png");
     bgGameOver->setContentSize(Size(visibleSize.width, visibleSize.height));
     bgGameOver->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
     this->addChild(bgGameOver, 1000);
     //pannel
-    auto gamePannelSprite = Sprite::create("new-pannel-lesson-list.png");
+    gamePannelSprite = Sprite::create("new-pannel-course.png");
     gamePannelSprite->setContentSize(Size(visibleSize.width / 2.5, visibleSize.height / 2));
     gamePannelSprite->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y - visibleSize.height / 2));
     auto actionMove = MoveTo::create(0.2, Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
     gamePannelSprite->runAction(actionMove);
     bgGameOver->addChild(gamePannelSprite);
     //text
-    auto lblContent = Label::createWithTTF("Thua mất rồi", "fonts/arial.ttf", 14);
+    auto lblContent = Label::createWithTTF("Bé giỏi quá", "fonts/Linotte.ttf", 16);
     lblContent->setPosition(Vec2(gamePannelSprite->getContentSize().width/2, gamePannelSprite->getContentSize().height/2));
     lblContent->setTextColor(Color4B::BLACK);
     gamePannelSprite->addChild(lblContent);
-    auto lblContent2 = Label::createWithTTF("Cùng thử lại nhé!", "fonts/arial.ttf", 14);
+    auto lblContent2 = Label::createWithTTF("Cùng tiếp tục nhé!", "fonts/Linotte.ttf", 16);
     lblContent2->setPosition(Vec2(gamePannelSprite->getContentSize().width/2, lblContent->getPosition().y - lblContent->getContentSize().height));
     lblContent2->setTextColor(Color4B::BLACK);
     gamePannelSprite->addChild(lblContent2);
@@ -544,17 +564,152 @@ void MainGameScene::gameOver() {
                 break;
             case ui::Widget::TouchEventType::ENDED:
                 bgGameOver->removeFromParent();
-                gamePannelSprite->removeFromParent();
                 MainGameScene::clearGame();
                 break;
         }
     });
     gamePannelSprite->addChild(btRePlay);
     
-    auto lblTextButton = Label::createWithTTF("Chơi lại", "fonts/arial.ttf", 5);
+    auto lblTextButton = Label::createWithTTF("Chơi lại", "fonts/Linotte.ttf", 7);
     lblTextButton->setPosition(Vec2(btRePlay->getContentSize().width/2, btRePlay->getContentSize().height/2));
     lblTextButton->setTextColor(Color4B::WHITE);
     btRePlay->addChild(lblTextButton);
+    
+    auto sunBot = Sprite::create("sunbot-right.png");
+    float oldWidth = sunBot->getContentSize().width;
+    float oldHeight = sunBot->getContentSize().height;
+    float hSunBot = gamePannelSprite->getContentSize().height / 2;
+    float wSunBot = hSunBot * oldWidth / oldHeight;
+    sunBot->setContentSize(Size(wSunBot, hSunBot));
+    sunBot->setAnchorPoint(Vec2(0.5, 0));
+    sunBot->setPosition(Vec2(0, 0));
+    gamePannelSprite->addChild(sunBot);
+}
+
+void MainGameScene::gameOver() {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    //background
+    bgGameOver = Sprite::create("bg-transparent.png");
+    bgGameOver->setContentSize(Size(visibleSize.width, visibleSize.height));
+    bgGameOver->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+    this->addChild(bgGameOver, 1000);
+    //pannel
+    gamePannelSprite = Sprite::create("new-pannel-lesson-list.png");
+    gamePannelSprite->setContentSize(Size(visibleSize.width / 2.5, visibleSize.height / 2));
+    gamePannelSprite->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y - visibleSize.height / 2));
+    auto actionMove = MoveTo::create(0.2, Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+    gamePannelSprite->runAction(actionMove);
+    bgGameOver->addChild(gamePannelSprite);
+    //text
+    auto lblContent = Label::createWithTTF("Thua mất rồi", "fonts/Linotte.ttf", 16);
+    lblContent->setPosition(Vec2(gamePannelSprite->getContentSize().width/2, gamePannelSprite->getContentSize().height/2));
+    lblContent->setTextColor(Color4B::BLACK);
+    gamePannelSprite->addChild(lblContent);
+    auto lblContent2 = Label::createWithTTF("Cùng thử lại nhé!", "fonts/Linotte.ttf", 16);
+    lblContent2->setPosition(Vec2(gamePannelSprite->getContentSize().width/2, lblContent->getPosition().y - lblContent->getContentSize().height));
+    lblContent2->setTextColor(Color4B::BLACK);
+    gamePannelSprite->addChild(lblContent2);
+    //Button
+    auto btRePlay = ui::Button::create("new-menu-button-2.png");
+    btRePlay->setScale((gamePannelSprite->getContentSize().width/2) / btRePlay->getContentSize().width);
+    btRePlay->setPosition(Vec2(gamePannelSprite->getContentSize().width / 2, 0));
+    btRePlay->addTouchEventListener([&](Ref* sender, ui::Widget::TouchEventType type){
+        switch (type) {
+            case ui::Widget::TouchEventType::BEGAN:
+                CCLOG("BEGAN");
+                break;
+            case ui::Widget::TouchEventType::ENDED:
+                bgGameOver->removeFromParent();
+                MainGameScene::clearGame();
+                break;
+        }
+    });
+    gamePannelSprite->addChild(btRePlay);
+    
+    auto lblTextButton = Label::createWithTTF("Chơi lại", "fonts/Linotte.ttf", 7);
+    lblTextButton->setPosition(Vec2(btRePlay->getContentSize().width/2, btRePlay->getContentSize().height/2));
+    lblTextButton->setTextColor(Color4B::WHITE);
+    btRePlay->addChild(lblTextButton);
+    
+    auto sunBot = Sprite::create("sunbot-sad.png");
+    float oldWidth = sunBot->getContentSize().width;
+    float oldHeight = sunBot->getContentSize().height;
+    float hSunBot = gamePannelSprite->getContentSize().height / 2;
+    float wSunBot = hSunBot * oldWidth / oldHeight;
+    sunBot->setContentSize(Size(wSunBot, hSunBot));
+    sunBot->setAnchorPoint(Vec2(0.5, 0));
+    sunBot->setPosition(Vec2(0, 0));
+    gamePannelSprite->addChild(sunBot);
+}
+
+void MainGameScene::gameSetting() {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    //background
+    bgGameOver = Sprite::create("bg-transparent.png");
+    bgGameOver->setContentSize(Size(visibleSize.width, visibleSize.height));
+    bgGameOver->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+    this->addChild(bgGameOver, 1000);
+    //pannel
+    gamePannelSprite = Sprite::create("new-pannel-lesson-list.png");
+    gamePannelSprite->setContentSize(Size(visibleSize.width / 2.5, visibleSize.height / 2));
+    gamePannelSprite->setPosition(Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+//    auto actionMove = MoveTo::create(0.2, Vec2(origin.x + visibleSize.width / 2, origin.y + visibleSize.height / 2));
+//    gamePannelSprite->runAction(actionMove);
+    bgGameOver->addChild(gamePannelSprite);
+    //text
+    auto lblContent = Label::createWithTTF("PAUSED", "fonts/Linotte.ttf", 16);
+    lblContent->setPosition(Vec2(gamePannelSprite->getContentSize().width/2, gamePannelSprite->getContentSize().height - 20));
+    lblContent->setTextColor(Color4B::BLACK);
+    gamePannelSprite->addChild(lblContent);
+    //Button
+    auto btExit = ui::Button::create("new-menu-button-2.png");
+    btExit->setScale((gamePannelSprite->getContentSize().width/2) / btExit->getContentSize().width);
+        btExit->setAnchorPoint(Vec2(0.5, 0));
+    btExit->setPosition(Vec2(gamePannelSprite->getContentSize().width / 2, 5));
+    btExit->addTouchEventListener([&](Ref* sender, ui::Widget::TouchEventType type){
+        switch (type) {
+            case ui::Widget::TouchEventType::BEGAN:
+                CCLOG("BEGAN");
+                break;
+            case ui::Widget::TouchEventType::ENDED:
+                MainGameScene::clearGame();
+                auto lesson = LessonScene::createScene(lesIndex, lesCoursesId, lesLessonId, lesDescription, lessContent, lescDescription, lescName);
+                Director::getInstance()->replaceScene(lesson);
+                break;
+        }
+    });
+    gamePannelSprite->addChild(btExit);
+    
+    auto lblTextExit = Label::createWithTTF("Thoát", "fonts/Linotte.ttf", 7);
+    lblTextExit->setPosition(Vec2(btExit->getContentSize().width/2, btExit->getContentSize().height/2));
+    lblTextExit->setTextColor(Color4B::WHITE);
+    btExit->addChild(lblTextExit);
+    
+    auto btResume = ui::Button::create("new-menu-button-1.png");
+    float buttonScale = (gamePannelSprite->getContentSize().width/2) / btResume->getContentSize().width;
+    btResume->setScale(buttonScale);
+//    btResume->setAnchorPoint(Vec2(0.5, 0));
+    btResume->setPosition(Vec2(gamePannelSprite->getContentSize().width / 2, btExit->getPosition().y + btExit->getContentSize().height * 3));
+    btResume->addTouchEventListener([&](Ref* sender, ui::Widget::TouchEventType type){
+        switch (type) {
+            case ui::Widget::TouchEventType::BEGAN:
+                CCLOG("BEGAN");
+                break;
+            case ui::Widget::TouchEventType::ENDED:
+                Director::getInstance()->resume();
+                bgGameOver->removeFromParent();
+//                gamePannelSprite->removeFromParent();
+                break;
+        }
+    });
+    gamePannelSprite->addChild(btResume);
+    
+    auto lblTextButton = Label::createWithTTF("Chơi tiếp", "fonts/Linotte.ttf", 7);
+    lblTextButton->setPosition(Vec2(btResume->getContentSize().width/2, btResume->getContentSize().height/2));
+    lblTextButton->setTextColor(Color4B::WHITE);
+    btResume->addChild(lblTextButton);
 }
 
 void MainGameScene::getMap() {
@@ -569,43 +724,50 @@ void MainGameScene::getMap() {
 void MainGameScene::onCompleteHttpRequest(network::HttpClient *sender, network::HttpResponse *response) {
     std::vector<char> *buffer = response->getResponseData();
     log("DATA %s", buffer->data());
-    std::string str = buffer->data();
-    rapidjson::Document document;
-    document.Parse<0>(str.c_str());
-    
-    if (document.HasParseError()) {
-        CCLOG("Error!");
-        MainGameScene::getMap();
-    } else {
-        if(document.IsObject()) {
-            rapidjson::Value &arr = document["impediments"];
-            count = arr.Size();
-            if(count == 0) {
-                MainGameScene::hideLoading();
-            }
-            for (rapidjson::SizeType i = 0; i < arr.Size(); i++) {
-                if(arr[i]["type"].GetInt() == 1) {
-                    int x = arr[i]["indexOfCell"].GetInt() % numberOfColumn;
-                    int y = arr[i]["indexOfCell"].GetInt() / numberOfRow;
-                    mFirstPoint = new Point(Vec2(x, y));
+    if(buffer->data() != NULL) {
+        std::string str = buffer->data();
+        rapidjson::Document document;
+        document.Parse<0>(str.c_str());
+        
+        if (document.HasParseError()) {
+            CCLOG("Error!");
+            MainGameScene::getMap();
+        } else {
+            if(document.IsObject()) {
+                rapidjson::Value &arr = document["impediments"];
+                count = arr.Size();
+                if(count == 0) {
+                    MainGameScene::hideLoading();
                 }
-                if(arr[i]["indexOfCell"].GetInt() != -1) {
-                    vIndexOfCell.push_back(arr[i]["indexOfCell"].GetInt());
-                } else {
-                    vIndexOfCell.push_back(0);
-                }
-                vType.push_back(arr[i]["type"].GetInt());
-                if(arr[i]["imageUrl"].GetStringLength() > 1) {
-                    MainGameScene::loadImage(arr[i]["imageUrl"].GetString());
-                } else {
-                    idx++;
-                    if(idx >= count) {
-                        MainGameScene::hideLoading();
-                        idx = 0;
+                for (rapidjson::SizeType i = 0; i < arr.Size(); i++) {
+                    if(arr[i]["type"].GetInt() == 1) {
+                        int x = arr[i]["indexOfCell"].GetInt() % numberOfColumn;
+                        int y = arr[i]["indexOfCell"].GetInt() / numberOfRow;
+                        mFirstPoint = new Point(Vec2(x, y));
+                    }
+                    if(arr[i]["indexOfCell"].GetInt() != -1) {
+                        vIndexOfCell.push_back(arr[i]["indexOfCell"].GetInt());
+                    } else {
+                        vIndexOfCell.push_back(0);
+                    }
+                    vType.push_back(arr[i]["type"].GetInt());
+                    if(arr[i]["imageUrl"].GetStringLength() > 1) {
+                        MainGameScene::loadImage(arr[i]["imageUrl"].GetString());
+                    } else {
+                        idx++;
+                        if(idx >= count) {
+                            MainGameScene::hideLoading();
+                            idx = 0;
+                        }
                     }
                 }
             }
         }
+    } else {
+        level--;
+        auto mainGame = MainGameScene::createScene(lesIndex, lesCoursesId, lesLessonId, lesDescription, lessContent, lescDescription, lescName);
+        Director::getInstance()->replaceScene(mainGame);
+//        MainGameScene::getMap();
     }
 }
 

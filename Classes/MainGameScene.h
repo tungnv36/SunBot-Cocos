@@ -50,6 +50,8 @@ private:
     int getTypeByIndexOfCell(int indexOfCell);
     void gameWin();
     void gameOver();
+    void gameSetting();
+    void nextBackGame();
 };
 
 #endif // __HELLOWORLD_SCENE_H__
