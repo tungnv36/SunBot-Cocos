@@ -25,6 +25,9 @@ public:
     
     static cocos2d::Scene* createScene(int index, int coursesId, int lessonId, std::string description, std::string sContent, std::string cDescription, std::string cName);
 
+    bool onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *unused_event);
+    bool onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *unused_event);
+    
     virtual bool init();
     
     // a selector callback

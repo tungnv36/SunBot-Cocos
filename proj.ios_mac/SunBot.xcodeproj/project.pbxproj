@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0434F04321023EB900A8CA84 /* sound.wav in Resources */ = {isa = PBXBuildFile; fileRef = 0434F04221023EB900A8CA84 /* sound.wav */; };
 		0453E4282100D45E00909EAA /* sunbot-sad.png in Resources */ = {isa = PBXBuildFile; fileRef = 0453E4262100D45E00909EAA /* sunbot-sad.png */; };
 		04E9C48520FBA03800C0EE9A /* new-left.png in Resources */ = {isa = PBXBuildFile; fileRef = 04E9C48220FBA03700C0EE9A /* new-left.png */; };
 		04E9C48620FBA03800C0EE9A /* new-right.png in Resources */ = {isa = PBXBuildFile; fileRef = 04E9C48420FBA03800C0EE9A /* new-right.png */; };
@@ -179,6 +180,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0434F04221023EB900A8CA84 /* sound.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = sound.wav; sourceTree = "<group>"; };
 		0453E4262100D45E00909EAA /* sunbot-sad.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "sunbot-sad.png"; sourceTree = "<group>"; };
 		04E9C48220FBA03700C0EE9A /* new-left.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "new-left.png"; path = "../../../../../../Users/mac/Creative Cloud Files/3x/new-left.png"; sourceTree = "<group>"; };
 		04E9C48420FBA03800C0EE9A /* new-right.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "new-right.png"; path = "../../../../../../Users/mac/Creative Cloud Files/3x/new-right.png"; sourceTree = "<group>"; };
@@ -361,6 +363,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0434F04021023EA100A8CA84 /* audio */ = {
+			isa = PBXGroup;
+			children = (
+				0434F04221023EB900A8CA84 /* sound.wav */,
+			);
+			path = audio;
+			sourceTree = "<group>";
+		};
 		080E96DDFE201D6D7F000001 /* ios */ = {
 			isa = PBXGroup;
 			children = (
@@ -441,6 +451,7 @@
 		46880B7519C43A67006E1F66 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				0434F04021023EA100A8CA84 /* audio */,
 				521A8EA819F11F5000D177D7 /* fonts */,
 				3EACC98E19EE6D4300EB3C5E /* res */,
 				46880B7619C43A67006E1F66 /* CloseNormal.png */,
@@ -698,6 +709,7 @@
 				226346F820DAB24900C5779C /* button_play.png in Resources */,
 				221277EC20F4EAF700E31E20 /* new-earse.png in Resources */,
 				5087E78617EB970100C73F5D /* Icon-76.png in Resources */,
+				0434F04321023EB900A8CA84 /* sound.wav in Resources */,
 				221277EF20F4EAF700E31E20 /* new-play.png in Resources */,
 				5087E77F17EB970100C73F5D /* Default@2x.png in Resources */,
 				50EF629917ECD46A001EB2F8 /* Icon-100.png in Resources */,

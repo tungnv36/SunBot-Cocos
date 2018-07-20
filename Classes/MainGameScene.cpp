@@ -4,6 +4,7 @@
 #include "json/rapidjson.h"
 #include "LessonListScene.h"
 #include "LessonScene.h"
+#include "SimpleAudioEngine.h"
 
 USING_NS_CC;
 USING_NS_CC_EXT;
@@ -21,6 +22,9 @@ int startPoint = 1;
 int endPoint = 2;
 int objectPoint = 3;
 
+int mXIndex = -1;
+int mYIndex = -1;
+
 bool isPlay = true;
 
 std::string mDirection = "T";
@@ -33,6 +37,11 @@ Sprite *spSunBot;
 
 Sprite *bgGameOver;
 Sprite *gamePannelSprite;
+
+DrawNode *ln;
+std::vector<int> tags;
+
+CocosDenshion::SimpleAudioEngine *audio;
 
 Scene* MainGameScene::createScene(int index, int coursesId, int lessonId, std::string description, std::string sContent, std::string cDescription, std::string cName)
 {
@@ -67,6 +76,9 @@ bool MainGameScene::init()
     auto visibleSize = Director::getInstance()->getVisibleSize();
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     
+    audio = CocosDenshion::SimpleAudioEngine::getInstance();
+    audio->playBackgroundMusic("sound.wav", true);
+    
     auto btBack = ui::Button::create("new-delete.png");
     btBack->setScale(20 / btBack->getContentSize().width);
     btBack->setPosition(Vec2(origin.x + visibleSize.width - 15, origin.y + visibleSize.height - 40));
@@ -77,6 +89,7 @@ bool MainGameScene::init()
                 break;
             case ui::Widget::TouchEventType::ENDED:
                 MainGameScene::clearGame();
+                audio->stopBackgroundMusic();
                 auto lesson = LessonScene::createScene(lesIndex, lesCoursesId, lesLessonId, lesDescription, lessContent, lescDescription, lescName);
                 Director::getInstance()->replaceScene(lesson);
                 break;
@@ -202,6 +215,12 @@ bool MainGameScene::init()
                 CCLOG("BEGAN");
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                if(tags.size() > 0) {
+                    for(int tag : tags) {
+                        this->removeChildByTag(tag);
+                    }
+                    tags.clear();
+                }
                 break;
         }
     });
@@ -236,6 +255,7 @@ bool MainGameScene::init()
             case ui::Widget::TouchEventType::ENDED:
                 MainGameScene::gameSetting();
                 Director::getInstance()->pause();
+                audio->pauseBackgroundMusic();
                 break;
         }
     });
@@ -423,10 +443,63 @@ bool MainGameScene::init()
     MainGameScene::showLoading();
     MainGameScene::getMap();
     
-    auto draw = DrawNode::create();
+    auto touchListener = EventListenerTouchOneByOne::create();
+    touchListener->onTouchBegan = CC_CALLBACK_2(MainGameScene::onTouchBegan, this);
+    touchListener->onTouchMoved = CC_CALLBACK_2(MainGameScene::onTouchMoved, this);
+    this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
     
-//    draw->drawLine(Point(0, 0), Point(100, 100), Color4F::RED);
-//    this->addChild(draw,1);
+//    ln = DrawNode::create();
+//    this->addChild(ln);
+    
+    return true;
+}
+
+bool MainGameScene::onTouchBegan(Touch *touch, Event *unused_event) {
+    Vec2 touchLocation = touch->getLocation();
+    float xStart = bgGameBoard->getPosition().x + 5;
+    float yStart = bgGameBoard->getPosition().y - bgGameBoard->getContentSize().height + 5;
+    float xTouch = touchLocation.x - xStart;
+    float yTouch = touchLocation.y - yStart;
+    
+    float wSquare = gameBoard->getContentSize().width / numberOfColumn;
+    float hSquare = (gameBoard->getContentSize().height) / numberOfColumn;
+    
+    mXIndex = xTouch / wSquare;
+    mYIndex = yTouch / hSquare;
+    
+    ln = DrawNode::create();
+    
+    return true;
+}
+
+bool MainGameScene::onTouchMoved(Touch *touch, Event *unused_event) {
+    auto visibleSize = Director::getInstance()->getVisibleSize();
+    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+    
+    Vec2 touchLocation = touch->getLocation();
+    float xStart = bgGameBoard->getPosition().x + 5;
+    float yStart = bgGameBoard->getPosition().y - bgGameBoard->getContentSize().height + 5;
+    float xTouch = touchLocation.x - xStart;
+    float yTouch = touchLocation.y - yStart;
+    
+    float wSquare = gameBoard->getContentSize().width / numberOfColumn;
+    float hSquare = (gameBoard->getContentSize().height) / numberOfColumn;
+    
+    int xIndex = xTouch / wSquare;
+    int yIndex = yTouch / hSquare;
+
+    Color4F clrb = Color4F(1.0f, 0.0f, 0.0f, 0.5f);
+    float lineWidth = 0.5 * CC_CONTENT_SCALE_FACTOR();
+
+    if(mXIndex != xIndex || mYIndex != yIndex) {
+        tags.push_back(yIndex * numberOfRow + xIndex);
+        ln = DrawNode::create();
+        ln->setTag(yIndex * numberOfRow + xIndex);
+        ln->drawSegment(Vec2(xStart + mXIndex * wSquare + wSquare / 2, yStart + mYIndex * hSquare + hSquare / 2), Vec2(xStart + xIndex * wSquare + wSquare / 2, yStart + yIndex * hSquare + hSquare / 2), lineWidth, clrb);
+        mXIndex = xIndex;
+        mYIndex = yIndex;
+        this->addChild(ln);
+    }
     
     return true;
 }
@@ -583,7 +656,7 @@ void MainGameScene::gameWin() {
     sunBot->setContentSize(Size(wSunBot, hSunBot));
     sunBot->setAnchorPoint(Vec2(0.5, 0));
     sunBot->setPosition(Vec2(0, 0));
-    gamePannelSprite->addChild(sunBot);
+    gamePannelSprite->addChild(sunBot, 100);
 }
 
 void MainGameScene::gameOver() {
@@ -675,6 +748,7 @@ void MainGameScene::gameSetting() {
                 break;
             case ui::Widget::TouchEventType::ENDED:
                 MainGameScene::clearGame();
+                audio->stopBackgroundMusic();
                 auto lesson = LessonScene::createScene(lesIndex, lesCoursesId, lesLessonId, lesDescription, lessContent, lescDescription, lescName);
                 Director::getInstance()->replaceScene(lesson);
                 break;
@@ -698,6 +772,7 @@ void MainGameScene::gameSetting() {
                 CCLOG("BEGAN");
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                audio->resumeBackgroundMusic();
                 Director::getInstance()->resume();
                 bgGameOver->removeFromParent();
 //                gamePannelSprite->removeFromParent();
