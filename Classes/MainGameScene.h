@@ -19,6 +19,7 @@ public:
     std::vector<cocos2d::Point> vPoint;
     std::vector<cocos2d::Point> vPointBreak;
     
+    cocos2d::ui::ListView *listView;
     cocos2d::Sprite *loading1;
     cocos2d::Sprite *loading2;
     cocos2d::Sprite *bgLoading;
@@ -27,6 +28,7 @@ public:
 
     bool onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *unused_event);
     bool onTouchMoved(cocos2d::Touch *touch, cocos2d::Event *unused_event);
+    void selectedItemEvent(Ref *sender, cocos2d::ui::ListView::EventType type);
     
     virtual bool init();
     
@@ -55,6 +57,7 @@ private:
     void gameOver();
     void gameSetting();
     void nextBackGame();
+    void addListAction(std::string name);
 };
 
 #endif // __HELLOWORLD_SCENE_H__

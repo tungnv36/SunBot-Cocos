@@ -5,6 +5,7 @@
 #include "LessonListScene.h"
 #include "LessonScene.h"
 #include "SimpleAudioEngine.h"
+#include <string>
 
 USING_NS_CC;
 USING_NS_CC_EXT;
@@ -271,6 +272,7 @@ bool MainGameScene::init()
                 CCLOG("BEGAN");
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                MainGameScene::addListAction("new-down.png");
                 vAction.push_back("B");
                 //Lấy vị trí trước
                 auto oldPoint = mFirstPoint;
@@ -330,6 +332,7 @@ bool MainGameScene::init()
                 CCLOG("BEGAN");
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                MainGameScene::addListAction("new-up.png");
                 vAction.push_back("T");
                 //Lấy vị trí trước
                 auto oldPoint = mFirstPoint;
@@ -377,6 +380,7 @@ bool MainGameScene::init()
                 CCLOG("BEGAN");
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                MainGameScene::addListAction("new-left.png");
                 vAction.push_back("L");
                 //Lấy vị trí trước
                 auto oldPoint = mFirstPoint;
@@ -410,6 +414,7 @@ bool MainGameScene::init()
                 CCLOG("BEGAN");
                 break;
             case ui::Widget::TouchEventType::ENDED:
+                MainGameScene::addListAction("new-right.png");
                 vAction.push_back("R");
                 //Lấy vị trí trước
                 auto oldPoint = mFirstPoint;
@@ -448,10 +453,31 @@ bool MainGameScene::init()
     touchListener->onTouchMoved = CC_CALLBACK_2(MainGameScene::onTouchMoved, this);
     this->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
     
-//    ln = DrawNode::create();
-//    this->addChild(ln);
+    listView = ui::ListView::create();
+    listView->setDirection(ui::ScrollView::Direction::HORIZONTAL);
+    listView->setClippingEnabled(false);
+    listView->setAnchorPoint(Vec2(0, 0));
+    listView->setContentSize(Size(bgGameBoard->getContentSize().width, 60));
+    listView->setPosition(Vec2(origin.x + 10, origin.y - 15));
+
+    listView->setItemsMargin(5);
+
+    listView->addEventListener(CC_CALLBACK_2(MainGameScene::selectedItemEvent, this));
+    this->addChild(listView);
     
     return true;
+}
+
+void MainGameScene::selectedItemEvent(Ref *sender, ui::ListView::EventType type) {
+    ui::ListView *listview = static_cast<ui::ListView *>(sender);
+    switch (type) {
+        case cocos2d::ui::ListView::EventType::ON_SELECTED_ITEM_START:
+            break;
+        case cocos2d::ui::ListView::EventType::ON_SELECTED_ITEM_END:
+            log("SELECTED %ld", listview->getCurSelectedIndex());
+            
+            break;
+    }
 }
 
 bool MainGameScene::onTouchBegan(Touch *touch, Event *unused_event) {
@@ -464,12 +490,20 @@ bool MainGameScene::onTouchBegan(Touch *touch, Event *unused_event) {
     float wSquare = gameBoard->getContentSize().width / numberOfColumn;
     float hSquare = (gameBoard->getContentSize().height) / numberOfColumn;
     
-    mXIndex = xTouch / wSquare;
-    mYIndex = yTouch / hSquare;
+    if(xTouch >= 0 && yTouch >= 0) {
+        mXIndex = xTouch / wSquare;
+        mYIndex = yTouch / hSquare;
+    }
     
     ln = DrawNode::create();
     
     return true;
+}
+
+void MainGameScene::addListAction(std::string name) {
+    ui::Button *bgItem = ui::Button::create(name);
+    bgItem->setScale(25 / bgItem->getContentSize().width);
+    listView->pushBackCustomItem(bgItem);
 }
 
 bool MainGameScene::onTouchMoved(Touch *touch, Event *unused_event) {
@@ -482,25 +516,26 @@ bool MainGameScene::onTouchMoved(Touch *touch, Event *unused_event) {
     float xTouch = touchLocation.x - xStart;
     float yTouch = touchLocation.y - yStart;
     
-    float wSquare = gameBoard->getContentSize().width / numberOfColumn;
-    float hSquare = (gameBoard->getContentSize().height) / numberOfColumn;
-    
-    int xIndex = xTouch / wSquare;
-    int yIndex = yTouch / hSquare;
+    if(xTouch >= 0 && yTouch >= 0) {
+        float wSquare = gameBoard->getContentSize().width / numberOfColumn;
+        float hSquare = (gameBoard->getContentSize().height) / numberOfColumn;
+        
+        int xIndex = xTouch / wSquare;
+        int yIndex = yTouch / hSquare;
 
-    Color4F clrb = Color4F(1.0f, 0.0f, 0.0f, 0.5f);
-    float lineWidth = 0.5 * CC_CONTENT_SCALE_FACTOR();
+        Color4F clrb = Color4F(1.0f, 0.0f, 0.0f, 0.5f);
+        float lineWidth = 0.5 * CC_CONTENT_SCALE_FACTOR();
 
-    if(mXIndex != xIndex || mYIndex != yIndex) {
-        tags.push_back(yIndex * numberOfRow + xIndex);
-        ln = DrawNode::create();
-        ln->setTag(yIndex * numberOfRow + xIndex);
-        ln->drawSegment(Vec2(xStart + mXIndex * wSquare + wSquare / 2, yStart + mYIndex * hSquare + hSquare / 2), Vec2(xStart + xIndex * wSquare + wSquare / 2, yStart + yIndex * hSquare + hSquare / 2), lineWidth, clrb);
-        mXIndex = xIndex;
-        mYIndex = yIndex;
-        this->addChild(ln);
+        if(mXIndex != xIndex || mYIndex != yIndex) {
+            tags.push_back(yIndex * numberOfRow + xIndex);
+            ln = DrawNode::create();
+            ln->setTag(yIndex * numberOfRow + xIndex);
+            ln->drawSegment(Vec2(xStart + mXIndex * wSquare + wSquare / 2, yStart + mYIndex * hSquare + hSquare / 2), Vec2(xStart + xIndex * wSquare + wSquare / 2, yStart + yIndex * hSquare + hSquare / 2), lineWidth, clrb);
+            mXIndex = xIndex;
+            mYIndex = yIndex;
+            this->addChild(ln);
+        }
     }
-    
     return true;
 }
 
@@ -531,6 +566,7 @@ int MainGameScene::getTypeByIndexOfCell(int indexOfCell) {
 }
 
 void MainGameScene::clearGame() {
+    listView->removeAllItems();
     float wSquare = gameBoard->getContentSize().width / numberOfColumn;
     float hSquare = (gameBoard->getContentSize().height) / numberOfColumn;
     spSunBot->setPosition(Vec2(mFirstPoint->x * wSquare + wSquare/2, mFirstPoint->y * hSquare + hSquare/2));
@@ -797,6 +833,8 @@ void MainGameScene::getMap() {
 }
 
 void MainGameScene::onCompleteHttpRequest(network::HttpClient *sender, network::HttpResponse *response) {
+    int wSquare = 2 * gameBoard->getContentSize().width / numberOfColumn;
+    int hSquare = 2 * (gameBoard->getContentSize().height) / numberOfColumn;
     std::vector<char> *buffer = response->getResponseData();
     log("DATA %s", buffer->data());
     if(buffer->data() != NULL) {
@@ -827,7 +865,7 @@ void MainGameScene::onCompleteHttpRequest(network::HttpClient *sender, network::
                     }
                     vType.push_back(arr[i]["type"].GetInt());
                     if(arr[i]["imageUrl"].GetStringLength() > 1) {
-                        MainGameScene::loadImage(arr[i]["imageUrl"].GetString());
+                        MainGameScene::loadImage(StringUtils::format("%s?w=%d&h=%d", arr[i]["imageUrl"].GetString(), wSquare, wSquare));
                     } else {
                         idx++;
                         if(idx >= count) {
@@ -892,7 +930,7 @@ void MainGameScene::onRequestImgCompleted(network::HttpClient *sender, network::
         Texture2D * texture = new  Texture2D ();
         texture-> initWithImage (image);
         spSunBot = Sprite :: createWithTexture (texture);
-        spSunBot->setContentSize(Size(wSquare>hSquare?hSquare:wSquare, wSquare>hSquare?hSquare:wSquare));
+        spSunBot->setContentSize(Size(wSquare>hSquare?hSquare:wSquare, wSquare>hSquare?hSquare:wSquare - 6));
         spSunBot->setPosition(Vec2(x * wSquare + wSquare/2, y * hSquare + hSquare/2));
         gameBoard->addChild(spSunBot, 200);
     } else {
